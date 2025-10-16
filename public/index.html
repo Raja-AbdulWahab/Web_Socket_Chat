@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Chat with Usernames</title>
+    <style>
+      body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+      #chat {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+      }
+      .system { color: gray; font-style: italic; }
+      .message { margin: 5px 0; }
+      .username { font-weight: bold; margin-right: 4px; color: #0077cc; }
+    </style>
+  </head>
+  <body>
+    <h2>💬 Real-Time Chat</h2>
+    <div id="chat"></div>
+
+    <div id="inputArea" style="display:none;">
+      <input id="msgInput" placeholder="Type message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+
+    <script>
+      const username = prompt("Enter your username:");
+      // 1️⃣ connect to WebSocket server
+      const socket = new WebSocket("ws://localhost:3000");
+      const chatDiv = document.getElementById("chat");
+      const inputArea = document.getElementById("inputArea");
+
+       // 2️⃣ when connection established
+      socket.onopen = () => {
+        console.log("✅ Connected to server");
+        // tell the server who we are
+        socket.send(JSON.stringify({ type: "join", username }));
+        inputArea.style.display = "block";
+      };
+
+      // 3️⃣ when message received from server
+      socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "system") {
+          chatDiv.innerHTML += `<p class="system">⚙️ ${msg.text}</p>`;
+        } else if (msg.type === "chat") {
+          chatDiv.innerHTML += `<p class="message"><span class="username">${msg.username}:</span>${msg.text}</p>`;
+        }
+        chatDiv.scrollTop = chatDiv.scrollHeight; // auto scroll
+      };
+
+      // 4️⃣ when button clicked, send message
+      document.getElementById("sendBtn").onclick = () => {
+        const input = document.getElementById("msgInput");
+        const text = input.value.trim();
+        if (text) {
+          socket.send(JSON.stringify({ type: "chat", text }));
+          input.value = "";
+        }
+      };
+    </script>
+  </body>
+</html>
