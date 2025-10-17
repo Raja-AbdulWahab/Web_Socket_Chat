@@ -87,7 +87,7 @@ function sendMessage() {
 
 Clone the repository
 
-git clone https://github.com/YOUR_USERNAME/websocket-chat.git
+git clone https://github.com/Raja-AbdulWahab/websocket-chat.git
 
 
 Install dependencies
